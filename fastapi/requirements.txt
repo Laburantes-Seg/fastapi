@@ -4,4 +4,5 @@ uvicorn
 jinja2
 python-multipart
 fastapi
-
+sqlalchemy
+sqlite3  # (aunque opcional, si ya viene con Python)
