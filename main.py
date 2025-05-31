@@ -336,7 +336,9 @@ async def Busco_Relacion_trabajador_servicio(servicioid: int, trabajadorid: int,
     #return {'Claves - Nombre de Trabajador y Servicio Ofrecido por él': users}
     return usersi
 #############################################
-
+@app.get("/ping")
+def pong():
+    return {"message": "pong"}
 
 ##########
 
