@@ -366,8 +366,8 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     result = db.execute(db_stmt)
     foto =  [row[5] for row in result]
 
-    #result = db.execute(db_stmt)
-    #penales =  [row[5] for row in result]
+    result = db.execute(db_stmt)
+    penales =  [row[5] for row in result]
 
     
     a=[]
