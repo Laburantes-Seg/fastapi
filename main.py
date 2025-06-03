@@ -351,9 +351,9 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     # ejecuto la consulta
     result = db.execute(db_stmt)
     # asigno los valores a los 4 campos seleccionados
-    ##id =  [row[0] for row in result]
+    id =  [row[0] for row in result]
 
-    ##result = db.execute(db_stmt)
+    result = db.execute(db_stmt)
     servicio =  [row[1] for row in result]
 
     result = db.execute(db_stmt)
