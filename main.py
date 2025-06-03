@@ -354,20 +354,20 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     ##id =  [row[0] for row in result]
 
     ##result = db.execute(db_stmt)
-    servicio =  [row[0] for row in result]
+    servicio =  [row[1] for row in result]
 
     result = db.execute(db_stmt)
-    nombre =  [row[1] for row in result]
+    nombre =  [row[2] for row in result]
 
     result = db.execute(db_stmt)
-    wsapp =  [row[2] for row in result]
+    wsapp =  [row[3] for row in result]
 
 # agregado foto y penales
     result = db.execute(db_stmt)
-    foto =  [row[3] for row in result]
+    foto =  [row[4] for row in result]
 
     result = db.execute(db_stmt)
-    penales =  [row[4] for row in result]
+    penales =  [row[5] for row in result]
 
     
     a=[]
