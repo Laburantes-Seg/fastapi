@@ -367,14 +367,14 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     foto =  [row[5] for row in result]
 
     result = db.execute(db_stmt)
-    penales =  [row[5] for row in result]
+    penales =  [row[6] for row in result]
 
     
     a=[]
     #b=''
     #genero tantos strings al front como registros existen de servicios_trabajadores
     for i in range(0, db_profes):
-        a = a +[id[i]]+[servicio[i]]+[nombre[i]]+[wsapp[i]]+['./'+foto[i]]
+        a = a +[id[i]]+[servicio[i]]+[nombre[i]]+[wsapp[i]]+['./'+foto[i]]+penales[i]
         #a = a +str(id[i])+' '+str(servicio[i])+' '+str(nombre[i])+' ' + ' $'+str(costo[i])+' ' +str(foto[i])+'---'
 
         #b= b +str(foto[i])
