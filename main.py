@@ -384,7 +384,7 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     #a.pop() 
     #'./claudio.jpeg'
     
-    return {'RegLog': a, 'WS':w }
+    return {'RegLog': a, 'Ws':w }
     #return {'RegLog': a }
 
 #############################################
