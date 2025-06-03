@@ -346,7 +346,7 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     # Cuento los registros de servicios_trabajadores existentes
     db_profes = db.query(Servicios_Trabajadores).join(Servicio).join(Trabajador).filter(Servicio.titulo == param).count() 
     # Selecciono las columnas a listar: Joint de las 3 tablas de 
-    db_stmt = select(Servicios_Trabajadores.id, Servicio.titulo, Trabajador.nombre,Trabajador.wsapp,Trabajador.foto, Trabajador.penales).select_from (Servicios_Trabajadores).join (Servicio).join(Trabajador).where(Servicio.titulo == param and Servicio.id == Servicios_Trabajadores.servicio_id and Servicios_Trabajadores.trabajador_id == Trabajador.id) 
+    db_stmt = select(Servicios_Trabajadores.id, Servicio.titulo, Trabajador.nombre,Servicios_Trabajadores.precioxhora,Trabajador.foto, Trabajador.penales).select_from (Servicios_Trabajadores).join (Servicio).join(Trabajador).where(Servicio.titulo == param and Servicio.id == Servicios_Trabajadores.servicio_id and Servicios_Trabajadores.trabajador_id == Trabajador.id) 
     
     # ejecuto la consulta
     result = db.execute(db_stmt)
@@ -360,7 +360,7 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     nombre =  [row[2] for row in result]
 
     result = db.execute(db_stmt)
-    wsapp =  [row[3] for row in result]
+    costo =  [row[3] for row in result]
 
 # agregado foto y penales
     result = db.execute(db_stmt)
@@ -374,7 +374,7 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     #b=''
     #genero tantos strings al front como registros existen de servicios_trabajadores
     for i in range(0, db_profes):
-        a = a +[servicio[i]]+[nombre[i]]+[wsapp[i]]+['./'+foto[i]]
+        a = a +[id[i]]+[servicio[i]]+[nombre[i]]+[costo[i]]+['./'+foto[i]]
         #a = a +str(id[i])+' '+str(servicio[i])+' '+str(nombre[i])+' ' + ' $'+str(costo[i])+' ' +str(foto[i])+'---'
 
         #b= b +str(foto[i])
