@@ -376,7 +376,7 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     for i in range(0, db_profes):
         a = a +[servicio[i]]+[nombre[i]]+['---']+['///']+['./'+foto[i]]
         #a = a +str(id[i])+' '+str(servicio[i])+' '+str(nombre[i])+' ' + ' $'+str(costo[i])+' ' +str(foto[i])+'---'
-
+        w = wsapp[i]
         #b= b +str(foto[i])
     #a = a.split(sep='---', maxsplit=-1)
     #b = b.split(sep='---', maxsplit=-1)
@@ -384,8 +384,8 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     #a.pop() 
     #'./claudio.jpeg'
     
-    #return {'RegLog': a, 'Archivo':b }
-    return {'RegLog': a }
+    return {'RegLog': a, 'WS':w }
+    #return {'RegLog': a }
 
 #############################################
 
