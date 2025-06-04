@@ -105,6 +105,7 @@ class TrabajadorUpdate(SQLModel):
     direccion: str | None = None
     localidad: str | None = None
     wsapp: str | None = None
+    penales: str | None = None
 
 ###
 
@@ -374,7 +375,7 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     #b=''
     #genero tantos strings al front como registros existen de servicios_trabajadores
     for i in range(0, db_profes):
-        a = a +[servicio[i]]+[nombre[i]]+['---']+[wsapp[i]]+['./'+foto[i]]
+        a = a +[servicio[i]]+[nombre[i]]+['---']+[wsapp[i]]+['./'+foto[i]]+[penales[i]]
         #a = a +[servicio[i]]+[nombre[i]]+['---']+['*****']+['./'+foto[i]]
 
         #a = a +str(id[i])+' '+str(servicio[i])+' '+str(nombre[i])+' ' + ' $'+str(costo[i])+' ' +str(foto[i])+'---'
