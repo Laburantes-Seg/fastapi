@@ -248,7 +248,7 @@ async def crear_registro_Servicio(registro:ServicioBase, db:db_dependency):
     return "El Alta del Servicio se realizó exitosamente"
 
 ### ahora la tabla asociativa
-@app.post("/Relacionar_Trabajador_Servicio /", status_code=status.HTTP_201_CREATED)
+@app.post("/Relacionar_Trabajador_Servicio/", status_code=status.HTTP_201_CREATED)
 async def crear_Relacion_Trabajador_Servicio(registro:ServicioTrabajadorBase, db:db_dependency):
     db_registro = Servicios_Trabajadores(**registro.dict())
     db_registro.id = int(str(db_registro.servicio_id) + str(db_registro.trabajador_id))
