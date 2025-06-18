@@ -264,7 +264,7 @@ async def crear_registro_Servicio(registro:ServicioBase, db:db_dependency):
  #   db.commit()
  #   return "El Alta del Trabajador - Servicio / Relacionado se realizó exitosamente"
 ##################################################
-@app.post("/Relacionar_Trabajador_Servicio/", status_code=status.HTTP_201_CREATED)
+@app.post("/Relacionar_Trabajador_Servicio/", status_code=201)
 async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, db: db_dependency):
     db_registro = Servicios_Trabajadores(**registro.dict())
     db_registro.id = int(str(db_registro.servicio_id) + str(db_registro.trabajador_id))
@@ -497,7 +497,7 @@ async def get_Relacion_Usuario_Trabajador_Servicios(db: Session = Depends(get_db
     #return {'Claves': len(claves)}
   
 ####################################################
-@app.get("/Servicios")
+@app.get("/ServiciosOld")
 async def Servicios(db: Session = Depends(get_db)):
 
     # Cuento los registros de servicios_trabajadores existentes
@@ -560,7 +560,7 @@ async def get_trabajador(id: int, db: Session = Depends(get_db)):
     return db_trabajador
 
 
-@app.get("/Trabajadores")
+@app.get("/TrabajadoresOld")
 async def get_trabajadores(db: Session = Depends(get_db)):
     db_trabajadores = db.query(Trabajador.id).all()
     #db_authors = db.query(Author).options(joinedload(Author.books)).all()
@@ -577,6 +577,11 @@ async def get_trabajadores(db: Session = Depends(get_db)):
     users = users.split(sep='---', maxsplit=-1)
     #return {'Clave y Nombrs de Trabajador': users}
     return users
+## 18 de junio
+@app.get("/Trabajadores")
+async def listar_trabajadores(db: db_dependency):
+    trabajadores = db.query(Trabajador).all()
+    return trabajadores
 
 @app.get("/Usuarios")
 async def get_usuarios(db: Session = Depends(get_db)):
