@@ -497,7 +497,7 @@ async def get_Relacion_Usuario_Trabajador_Servicios(db: Session = Depends(get_db
     #return {'Claves': len(claves)}
   
 ####################################################
-@app.get("/ServiciosOld")
+@app.get("/Servicios/")
 async def Servicios(db: Session = Depends(get_db)):
 
     # Cuento los registros de servicios_trabajadores existentes
