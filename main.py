@@ -232,13 +232,21 @@ async def crear_Relacion_Usuario_Trabajador_Servicio(registro:UsuarioServicioTra
     db.commit()
     return "El Alta del Usuario / Trabajador - Servicio / Relacionado se realizó exitosamente"
 
-##28 / 3
-@app.post("/registro/", status_code=status.HTTP_201_CREATED)
-async def crear_registro_Trabajador(registro:TrabajadorBase, db:db_dependency):
+##17 / 6
+@app.post("/registroOld/", status_code=status.HTTP_201_CREATED)
+async def crear_registro_TrabajadorOld(registro:TrabajadorBase, db:db_dependency):
     db_registro = Trabajador(**registro.dict())
     db.add(db_registro)
     db.commit()
     return "El Alta del Trabajador se realizó exitosamente"
+@app.post("/registro/", status_code=status.HTTP_201_CREATED)
+############### podificado por gpt
+async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency):
+    db_registro = Trabajador(**registro.dict())
+    db.add(db_registro)
+    db.commit()
+    db.refresh(db_registro)
+    return {"mensaje": "Registro exitoso", "id": db_registro.id}
 
 @app.post("/registro Servicio/", status_code=status.HTTP_201_CREATED)
 async def crear_registro_Servicio(registro:ServicioBase, db:db_dependency):
@@ -499,6 +507,32 @@ async def Servicios(db: Session = Depends(get_db)):
         a = a +str(servicio[i])+'---'
     a = a.split(sep='---', maxsplit=-1)
     a.pop()
+    return {'RegLog': a }
+####################################################
+####################################################
+@app.get("/Servicios_React/")
+async def Servicios(db: Session = Depends(get_db)):
+
+    # Cuento los registros de servicios_trabajadores existentes
+    db_servicios = db.query(Servicio.id).all()
+    tags = [row[0] for row in db_servicios] 
+    # Selecciono las columnas a listar: Joint de las 3 tablas de 
+    db_stmt = select(Servicio.titulo).select_from (Servicio) 
+    
+    # ejecuto la consulta
+    result = db.execute(db_stmt)
+    # asigno los valores a los 4 campos seleccionados
+    servicio =  [row[0] for row in result]
+
+    a=''
+    #genero tantos strings al front como registros existen de servicios_trabajadores
+    for i in range(0, len(tags)):
+        a = a +str(tags[i])+' '+str(servicio[i])+'---'
+    a = a.split(sep='---', maxsplit=-1)
+    a.pop()
+    a = [
+    {int(linea.split(' ', 1)[0]), linea.split(' ', 1)[1]}
+    for linea in a]
     return {'RegLog': a }
 ####################################################
 
