@@ -148,7 +148,7 @@ class UsuarioServicioTrabajadorBase(BaseModel):
 class ServicioTrabajadorBase(BaseModel):
     servicio_id: int
     trabajador_id: int
-    precioxhora: int
+    #precioxhora: int
 
 class TrabajadorBase(BaseModel):
     nombre: str
@@ -255,15 +255,25 @@ async def crear_registro_Servicio(registro:ServicioBase, db:db_dependency):
     db.commit()
     return "El Alta del Servicio se realizó exitosamente"
 
-### ahora la tabla asociativa
+### 18 de junio ahora la tabla asociativa
+#@app.post("/Relacionar_Trabajador_Servicio/", status_code=status.HTTP_201_CREATED)
+#async def crear_Relacion_Trabajador_Servicio(registro:ServicioTrabajadorBase, db:db_dependency):
+ #   db_registro = Servicios_Trabajadores(**registro.dict())
+ #   db_registro.id = int(str(db_registro.servicio_id) + str(db_registro.trabajador_id))
+ #   db.add(db_registro)
+ #   db.commit()
+ #   return "El Alta del Trabajador - Servicio / Relacionado se realizó exitosamente"
+##################################################
 @app.post("/Relacionar_Trabajador_Servicio/", status_code=status.HTTP_201_CREATED)
-async def crear_Relacion_Trabajador_Servicio(registro:ServicioTrabajadorBase, db:db_dependency):
+async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, db: db_dependency):
     db_registro = Servicios_Trabajadores(**registro.dict())
     db_registro.id = int(str(db_registro.servicio_id) + str(db_registro.trabajador_id))
     db.add(db_registro)
     db.commit()
-    return "El Alta del Trabajador - Servicio / Relacionado se realizó exitosamente"
-##################################################
+    return {"mensaje": "Relación creada correctamente"}
+
+
+########
 ### borro registro Servicio
 
 @app.delete("/Borro registro Servicio")
