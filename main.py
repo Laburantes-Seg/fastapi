@@ -541,7 +541,9 @@ async def Servicios(db: Session = Depends(get_db)):
     a = a.split(sep='---', maxsplit=-1)
     a.pop()
     a = [
-    {int(linea.split(' ', 1)[0]), linea.split(' ', 1)[1]}
+    #{int(linea.split(' ', 1)[0]), linea.split(' ', 1)[1]}
+    {"id": int(linea.split(' ', 1)[0]), "nombre": linea.split(' ', 1)[1]}
+    
     for linea in a]
     return {'RegLog': a }
 ####################################################
