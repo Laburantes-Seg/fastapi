@@ -10,8 +10,9 @@ FastAPI app called 'Laburing' that serves information about Servicios y Trabajad
 "many-to-many" relationship *without* extra data.
 27 de marzo 2025 ultima versión
 """
+from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Depends, status
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, select, Select
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, select, Select, DateTime
 from sqlalchemy.orm import declarative_base, relationship, joinedload
 from sqlalchemy.schema import PrimaryKeyConstraint
 from typing import Annotated, Optional
@@ -19,6 +20,7 @@ from sqlmodel import SQLModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -81,7 +83,15 @@ class Trabajador(Base):
     penales = Column(String, nullable=False)
     servicios = relationship("Servicio", secondary="servicios_trabajadores", back_populates='trabajadores')
 
-    #nuevos############### 28 / 3
+    #nuevos############### 19 / 6
+class Opinion(Base):
+    __tablename__ = 'opiniones'
+    id = Column(Integer, primary_key=True, index=True)
+    trabajador_id = Column(Integer, ForeignKey("trabajadores.id"), nullable=False)
+    comentario = Column(String, nullable=False)
+    calificacion = Column(Integer, nullable=False)  # Valor de 1 a 5, por ejemplo
+    fecha = Column(DateTime, default=datetime.now(timezone.utc))
+    ####
 
 class Usuario(Base):
     __tablename__ = 'usuarios'
@@ -141,6 +151,14 @@ import json
 from typing import List
 from pydantic import BaseModel, constr
 from fastapi.encoders import jsonable_encoder
+
+class OpinionCreate(BaseModel):
+    trabajador_id: int
+    comentario: str
+    calificacion: int
+    fecha:datetime
+
+
 class UsuarioServicioTrabajadorBase(BaseModel):
     usuario_id: int
     servicio_trabajador_id: int
@@ -215,13 +233,39 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
-###
+
 @app.post("/registro Usuarios/", status_code=status.HTTP_201_CREATED)
 async def crear_registro_Usuario(registro:UsuarioBase, db:db_dependency):
     db_registro = Usuario(**registro.dict())
     db.add(db_registro)
     db.commit()
     return "El Alta del Usuario se realizó exitosamente"
+
+from fastapi import Body
+import base64
+import os
+
+@app.post("/subir_foto_base64")
+async def subir_foto_base64(nombre: str = Body(...), contenido: str = Body(...)):
+    ruta_carpeta = "fotos"
+    os.makedirs(ruta_carpeta, exist_ok=True)
+    ruta = os.path.join(ruta_carpeta, nombre)
+
+    with open(ruta, "wb") as f:
+        f.write(base64.b64decode(contenido))
+
+    return {"mensaje": "Imagen guardada correctamente", "ruta": f"./{nombre}"}
+
+
+
+### ahora opiniones
+@app.post("/opiniones/")
+def crear_opinion(opinion: OpinionCreate, db: Session = Depends(get_db)):
+    nueva_opinion = Opinion(**opinion.dict())
+    db.add(nueva_opinion)
+    db.commit()
+    db.refresh(nueva_opinion)
+    return {"mensaje": "Opinión registrada con éxito", "id": nueva_opinion.id}
 
 ### ahora la tabla asociativa con Usuarios
 @app.post("/Relacionar Usuarios con Trabajador - Servicio /", status_code=status.HTTP_201_CREATED)
