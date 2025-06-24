@@ -244,17 +244,22 @@ async def crear_registro_Usuario(registro:UsuarioBase, db:db_dependency):
 from fastapi import Body
 import base64
 import os
+from fastapi import FastAPI, UploadFile, File
 
-@app.post("/subir_foto_base64")
-async def subir_foto_base64(nombre: str = Body(...), contenido: str = Body(...)):
-    ruta_carpeta = "fotos"
-    os.makedirs(ruta_carpeta, exist_ok=True)
-    ruta = os.path.join(ruta_carpeta, nombre)
+@app.post("/subir")
+async def subir_imagen(file: UploadFile = File(...)):
+    carpeta = "static/fotos"
+    os.makedirs(carpeta, exist_ok=True)
 
-    with open(ruta, "wb") as f:
-        f.write(base64.b64decode(contenido))
+    ruta_archivo = os.path.join(carpeta, file.filename)
+    with open(ruta_archivo, "wb") as f:
+        contenido = await file.read()
+        f.write(contenido)
 
-    return {"mensaje": "Imagen guardada correctamente", "ruta": f"./{nombre}"}
+    return {
+        "mensaje": "Imagen subida",
+        "url": f"https://trabajolibre.onrender.com/static/fotos/{file.filename}"
+    }
 
 
 
