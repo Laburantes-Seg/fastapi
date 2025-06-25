@@ -251,7 +251,8 @@ async def subir_imagen(file: UploadFile = File(...)):
     carpeta = "static/fotos"
     os.makedirs(carpeta, exist_ok=True)
 
-    ruta_archivo = os.path.join(carpeta, file.filename)
+    #ruta_archivo = os.path.join(carpeta, file.filename)
+    ruta_archivo = os.path.join("static", "fotos", file.filename)
     with open(ruta_archivo, "wb") as f:
         contenido = await file.read()
         f.write(contenido)
