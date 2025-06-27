@@ -87,7 +87,9 @@ class Trabajador(Base):
 class Opinion(Base):
     __tablename__ = 'opiniones'
     id = Column(Integer, primary_key=True, index=True)
-    trabajador_id = Column(Integer, ForeignKey("trabajadores.id"), nullable=False)
+    #trabajador_id = Column(Integer, ForeignKey("trabajadores.id"), nullable=False)
+    trabajador_id = Column(Integer)
+
     comentario = Column(String, nullable=False)
     calificacion = Column(Integer, nullable=False)  # Valor de 1 a 5, por ejemplo
     fecha = Column(DateTime, default=datetime.now(timezone.utc))
@@ -153,10 +155,9 @@ from pydantic import BaseModel, constr
 from fastapi.encoders import jsonable_encoder
 
 class OpinionCreate(BaseModel):
-    trabajador_id: int
     comentario: str
     calificacion: int
-    fecha:datetime
+
 
 
 class UsuarioServicioTrabajadorBase(BaseModel):
@@ -265,13 +266,18 @@ async def subir_imagen(file: UploadFile = File(...)):
 
 
 ### ahora opiniones
-@app.post("/opiniones/")
-def crear_opinion(opinion: OpinionCreate, db: Session = Depends(get_db)):
-    nueva_opinion = Opinion(**opinion.dict())
+@app.post("/opiniones/{param}")
+def crear_opinion(param: int, opinion: OpinionCreate, db: Session = Depends(get_db)):
+    nueva_opinion = Opinion(
+        trabajador_id=param,
+        comentario=opinion.comentario,
+        calificacion=opinion.calificacion,
+    )
     db.add(nueva_opinion)
     db.commit()
     db.refresh(nueva_opinion)
     return {"mensaje": "Opinión registrada con éxito", "id": nueva_opinion.id}
+
 
 ### ahora la tabla asociativa con Usuarios
 @app.post("/Relacionar Usuarios con Trabajador - Servicio /", status_code=status.HTTP_201_CREATED)
