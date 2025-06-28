@@ -278,7 +278,6 @@ def crear_opinion(param: int, opinion: OpinionCreate, db: Session = Depends(get_
     db.refresh(nueva_opinion)
     return {"mensaje": "Opinión registrada con éxito", "id": nueva_opinion.id}
 
-
 ### ahora la tabla asociativa con Usuarios
 @app.post("/Relacionar Usuarios con Trabajador - Servicio /", status_code=status.HTTP_201_CREATED)
 async def crear_Relacion_Usuario_Trabajador_Servicio(registro:UsuarioServicioTrabajadorBase, db:db_dependency):
@@ -370,6 +369,17 @@ async def delete_Relacion_trabajador_servicio(servicioid: int, trabajadorid: int
     return(usersi)
  
 #############################################
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from models import Opinion
+from schemas_opinion import OpinionOut
+
+
+@app.get("/opiniones_por_trabajador/{trabajador_id}", response_model=list[OpinionOut])
+def listar_opiniones(trabajador_id: int, db: Session = Depends(get_db)):
+    opiniones = db.query(Opinion).filter(Opinion.trabajador_id == trabajador_id).order_by(Opinion.fecha.desc()).all()
+    return opiniones
+
 
 @app.get("/Obtengo_registro_Relación_Trabajador_Servicio")
 async def Busco_Relacion_trabajador_servicio(servicioid: int, trabajadorid: int, db: Session = Depends(get_db)):
