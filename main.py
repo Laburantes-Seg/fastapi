@@ -398,8 +398,13 @@ from models import Opinion
   #  return opiniones
 
 @app.get("/opiniones_por_trabajador/{trabajador_id}")
-def opiniones_por_trabajador(trabajador_id: int):
-    return OPINIONES.get(trabajador_id, [])
+def opiniones_por_trabajador(trabajador_id: int, db: Session = Depends(get_db)):
+    opiniones = db.query(Opinion).filter(Opinion.trabajador_id == trabajador_id).order_by(Opinion.id.desc()).all()
+    return opiniones
+
+#@app.get("/opiniones_por_trabajador/{trabajador_id}")
+#def opiniones_por_trabajador(trabajador_id: int):
+#    return OPINIONES.get(trabajador_id, [])
   
 
 
