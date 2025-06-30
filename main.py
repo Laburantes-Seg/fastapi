@@ -95,12 +95,7 @@ class Opinion(Base):
     fecha = Column(DateTime, default=datetime.now(timezone.utc))
     #### para ver opiniones es lo que sigue
 
-    class OpinionOut(BaseModel):
-        comentario: str
-        calificacion: int
 
-    class Config:
-        orm_mode = True
 
 class Usuario(Base):
     __tablename__ = 'usuarios'
@@ -164,7 +159,11 @@ from fastapi.encoders import jsonable_encoder
 class OpinionCreate(BaseModel):
     comentario: str
     calificacion: int
-
+class OpinionOut(BaseModel):
+        comentario: str
+        calificacion: int
+class Config:
+        orm_mode = True
 
 
 class UsuarioServicioTrabajadorBase(BaseModel):
@@ -378,7 +377,7 @@ async def delete_Relacion_trabajador_servicio(servicioid: int, trabajadorid: int
 #############################################
 from fastapi import Depends
 from sqlalchemy.orm import Session
-
+from models import Opinion
 @app.get("/opiniones_por_trabajador/{trabajador_id}", response_model=list[OpinionOut])
 def listar_opiniones(trabajador_id: int, db: Session = Depends(get_db)):
     opiniones = db.query(Opinion).filter(Opinion.trabajador_id == trabajador_id).order_by(Opinion.fecha.desc()).all()
