@@ -22,17 +22,6 @@ from sqlalchemy import select
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-OPINIONES = {
-    1: [
-        {"comentario": "Muy buen laburante", "calificacion": 9},
-        {"comentario": "Puntual y prolijo", "calificacion": 8},
-    ],
-    2: [
-        {"comentario": "Muy profesional", "calificacion": 10},
-    ],
-    # etc...
-}
-
 origins = [
     "http://localhost.tiangolo.com",
     "https://localhost.tiangolo.com",
