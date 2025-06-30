@@ -93,7 +93,14 @@ class Opinion(Base):
     comentario = Column(String, nullable=False)
     calificacion = Column(Integer, nullable=False)  # Valor de 1 a 5, por ejemplo
     fecha = Column(DateTime, default=datetime.now(timezone.utc))
-    ####
+    #### para ver opiniones es lo que sigue
+
+    class OpinionOut(BaseModel):
+        comentario: str
+        calificacion: int
+
+    class Config:
+        orm_mode = True
 
 class Usuario(Base):
     __tablename__ = 'usuarios'
@@ -371,9 +378,6 @@ async def delete_Relacion_trabajador_servicio(servicioid: int, trabajadorid: int
 #############################################
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from models import Opinion
-from schemas_opinion import OpinionOut
-
 
 @app.get("/opiniones_por_trabajador/{trabajador_id}", response_model=list[OpinionOut])
 def listar_opiniones(trabajador_id: int, db: Session = Depends(get_db)):
