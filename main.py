@@ -380,8 +380,9 @@ async def delete_Relacion_trabajador_servicio(servicioid: int, trabajadorid: int
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from models import Opinion
+
 @app.get("/opiniones_por_trabajador/{trabajador_id}", response_model=list[OpinionOut])
-def listar_opiniones(trabajador_id: int, db: Session = Depends(get_db)):
+def opiniones_por_trabajador(trabajador_id: int, db: Session = Depends(get_db)):
     opiniones = db.query(Opinion).filter(Opinion.trabajador_id == trabajador_id).order_by(Opinion.fecha.desc()).all()
     return opiniones
 
