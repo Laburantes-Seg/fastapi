@@ -159,10 +159,12 @@ from fastapi.encoders import jsonable_encoder
 class OpinionCreate(BaseModel):
     comentario: str
     calificacion: int
+    
 class OpinionOut(BaseModel):
-        comentario: str
-        calificacion: int
-class Config:
+    comentario: str
+    calificacion: int
+
+    class Config:
         orm_mode = True
 
 
