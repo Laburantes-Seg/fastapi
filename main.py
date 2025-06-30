@@ -22,6 +22,17 @@ from sqlalchemy import select
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+OPINIONES = {
+    1: [
+        {"comentario": "Muy buen laburante", "calificacion": 9},
+        {"comentario": "Puntual y prolijo", "calificacion": 8},
+    ],
+    2: [
+        {"comentario": "Muy profesional", "calificacion": 10},
+    ],
+    # etc...
+}
+
 origins = [
     "http://localhost.tiangolo.com",
     "https://localhost.tiangolo.com",
@@ -381,10 +392,15 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from models import Opinion
 
-@app.get("/opiniones_por_trabajador/{trabajador_id}", response_model=list[OpinionOut])
-def opiniones_por_trabajador(trabajador_id: int, db: Session = Depends(get_db)):
-    opiniones = db.query(Opinion).filter(Opinion.trabajador_id == trabajador_id).order_by(Opinion.fecha.desc()).all()
-    return opiniones
+#@app.get("/opiniones_por_trabajador/{trabajador_id}", response_model=list[OpinionOut])
+#def opiniones_por_trabajador(trabajador_id: int, db: Session = Depends(get_db)):
+ #   opiniones = db.query(Opinion).filter(Opinion.trabajador_id == trabajador_id).order_by(Opinion.fecha.desc()).all()
+  #  return opiniones
+
+@app.get("/opiniones_por_trabajador/{trabajador_id}")
+def opiniones_por_trabajador(trabajador_id: int):
+    return OPINIONES.get(trabajador_id, [])
+  
 
 
 @app.get("/Obtengo_registro_Relación_Trabajador_Servicio")
