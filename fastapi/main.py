@@ -722,7 +722,9 @@ def listar_trabajadores_por_servicio(titulo_servicio: str, db: Session = Depends
             "nombre": row[2],
             "penales": row[3],
             "foto": row[4],
-            "wsapp": row[5]
+            "wsapp": row[5],
+            "Latitud": row[6],
+            "Longitud": row[7]
         }
         for row in consulta
     ]
