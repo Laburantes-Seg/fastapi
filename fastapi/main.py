@@ -251,9 +251,9 @@ db_dependency = Annotated[Session, Depends(get_db)]
 @app.post("/cargar_oficios/")
 def cargar_oficios(db: Session = Depends(get_db)):
     oficios = [
-        'Albañil','Vendedor' ,'Vendedor Ambulante' ,'Ayudante de Cocina' ,'Chapista' ,'Membranas', 'Zinguero','Empleada Doméstica' ,'Enfermera / Enfermero', 'Perforaciones','Taxista','Electricista','Electricista del Automotor' ,'Plomero', 'Gasista matriculado', 'Carpintero', 'Pintor',
+        'Albañil','Informático','Programador Web','Programador Front End','Programador Back End','Vendedor' ,'Vendedor Ambulante' ,'Ayudante de Cocina' ,'Chapista' ,'Membranas', 'Zinguero','Empleada Doméstica' ,'Enfermera / Enfermero', 'Perforaciones','Taxista','Electricista','Electricista del Automotor' ,'Plomero', 'Gasista matriculado', 'Carpintero', 'Pintor',
         'Cerrajero', 'Techista', 'Colocador de cerámicos', 'Colocador de durlock', 'Soldador',
-        'Mecánico automotor', 'Mecánico de motos', 'Reparador de electrodomésticos', 'Herrero',
+        'Mecánico automotor','Delyvery','Remisse', 'Mecánico de motos', 'Reparador de electrodomésticos', 'Herrero',
         'Jardinero', 'Podador', 'Cuidadores de adultos mayores', 'Niñera', 'Maestra particular',
         'Cocinero a domicilio', 'Delivery con moto', 'Mudanzas y fletes', 'Peluquero/a',
         'Manicuría y pedicuría', 'Estética y depilación', 'Masajista', 'Personal trainer',
@@ -708,7 +708,7 @@ async def get_trabajadores(db: Session = Depends(get_db)):
 @app.get("/Listo_trabajadoresPorServicio/{titulo_servicio}")
 def listar_trabajadores_por_servicio(titulo_servicio: str, db: Session = Depends(get_db)):
     consulta = (
-        db.query(Servicio.titulo, Trabajador.id, Trabajador.nombre, Trabajador.penales, Trabajador.foto, Trabajador.wsapp)
+        db.query(Servicio.titulo, Trabajador.id, Trabajador.nombre, Trabajador.penales, Trabajador.foto, Trabajador.wsapp, Trabajador.latitud, Trabajador.longitud)
         .join(Servicios_Trabajadores, Servicio.id == Servicios_Trabajadores.servicio_id)
         .join(Trabajador, Trabajador.id == Servicios_Trabajadores.trabajador_id)
         .filter(Servicio.titulo == titulo_servicio)
