@@ -705,41 +705,30 @@ async def get_trabajadores(db: Session = Depends(get_db)):
     #return {'Clave y Nombrs de Trabajador': users}
     return users
 ## 18 de junio
-@app.get("/Trabajadores")
-async def listar_trabajadores(db: db_dependency):
-    trabajadores = db.query(Trabajador).all()
-    return trabajadores
-
 @app.get("/Listo_trabajadoresPorServicio/{titulo_servicio}")
 def listar_trabajadores_por_servicio(titulo_servicio: str, db: Session = Depends(get_db)):
-    # JOIN entre Servicio, Servicios_Trabajadores y Trabajador
     consulta = (
-        db.query(Trabajador)
-        .join(Servicios_Trabajadores, Trabajador.id == Servicios_Trabajadores.trabajador_id)
-        .join(Servicio, Servicio.id == Servicios_Trabajadores.servicio_id)
+        db.query(Servicio.titulo, Trabajador.id, Trabajador.nombre, Trabajador.penales, Trabajador.foto, Trabajador.wsapp)
+        .join(Servicios_Trabajadores, Servicio.id == Servicios_Trabajadores.servicio_id)
+        .join(Trabajador, Trabajador.id == Servicios_Trabajadores.trabajador_id)
         .filter(Servicio.titulo == titulo_servicio)
         .all()
     )
 
-    # Convertir resultados a lista de dicts usando SQLAlchemy ORM
     resultado = [
         {
-            "id": t.id,
-            "nombre": t.nombre,
-            "dni": t.dni,
-            "correoElec": t.correoElec,
-            "direccion": t.direccion,
-            "localidad": t.localidad,
-            "latitud": t.latitud,
-            "longitud": t.longitud,
-            "wsapp": t.wsapp,
-            "foto": t.foto,
-            "penales": t.penales
+            "servicio": row[0],
+            "id": row[1],
+            "nombre": row[2],
+            "penales": row[3],
+            "foto": row[4],
+            "wsapp": row[5]
         }
-        for t in consulta
+        for row in consulta
     ]
 
     return {"trabajadores": resultado}
+
 
 
 @app.get("/Usuarios")
