@@ -12,7 +12,7 @@ FastAPI app called 'Laburing' that serves information about Servicios y Trabajad
 """
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Depends, status
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, select, Select, DateTime
+from sqlalchemy import create_engine, Column, Integer, Float, String, ForeignKey, select, Select, DateTime
 from sqlalchemy.orm import declarative_base, relationship, joinedload
 from sqlalchemy.schema import PrimaryKeyConstraint
 from typing import Annotated, Optional
@@ -78,6 +78,8 @@ class Trabajador(Base):
     correoElec = Column(String, nullable=False)
     direccion = Column(String, nullable=False)
     localidad = Column(String, nullable=False)
+    latitud = Column(Float)
+    longitud = Column(Float)
     wsapp = Column(String, nullable=False)
     foto = Column(String, nullable=False)
     penales = Column(String, nullable=False)
@@ -183,6 +185,8 @@ class TrabajadorBase(BaseModel):
     correoElec: str
     direccion: str
     localidad: str
+    latitud: float
+    longitud: float
     wsapp: str
     foto: str
     penales: str
@@ -242,6 +246,34 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
+@app.post("/cargar_oficios/")
+def cargar_oficios(db: Session = Depends(get_db)):
+    oficios = [
+        'Albañil','Vendedor' ,'Vendedor Ambulante' ,'Ayudante de Cocina' ,'Chapista' ,'Membranas', 'Zinguero','Empleada Doméstica' ,'Enfermera / Enfermero', 'Perforaciones','Taxista','Electricista','Electricista del Automotor' ,'Plomero', 'Gasista matriculado', 'Carpintero', 'Pintor',
+        'Cerrajero', 'Techista', 'Colocador de cerámicos', 'Colocador de durlock', 'Soldador',
+        'Mecánico automotor', 'Mecánico de motos', 'Reparador de electrodomésticos', 'Herrero',
+        'Jardinero', 'Podador', 'Cuidadores de adultos mayores', 'Niñera', 'Maestra particular',
+        'Cocinero a domicilio', 'Delivery con moto', 'Mudanzas y fletes', 'Peluquero/a',
+        'Manicuría y pedicuría', 'Estética y depilación', 'Masajista', 'Personal trainer',
+        'Entrenador deportivo', 'Profesor de música', 'Profesor de inglés','Profesor de Matemáticas' ,' Profesor de Gimnasia','Profesor de Danzas' ,'Profesor de Música' ,'Clases de apoyo escolar',
+        'Diseñador gráfico', 'Diseñador web', 'Fotógrafo', 'Videógrafo', 'Community manager',
+        'Desarrollador de software', 'Técnico en computación', 'Armado y reparación de PC',
+        'Instalador de cámaras de seguridad', 'Instalador de redes', 'Servicio de limpieza',
+        'Limpieza de vidrios', 'Limpieza final de obra', 'Cuidado de mascotas', 'Paseador de perros',
+        'Adiestrador canino', 'Yesero', 'Parquero', 'Servicio de catering', 'DJ para eventos',
+        'Animador de fiestas infantiles', 'Mozo para eventos', 'Bartender', 'Diseño de interiores',
+        'Montador de muebles', 'Costurera', 'Modista', 'Sastre', 'Tapicero', 'Tornero',
+        'Gomería móvil', 'Lavado de autos a domicilio', 'Reparación de bicicletas',
+        'Maquinista rural', 'Peón rural', 'Cuidador de campo', 'Apicultor', 'Viverista',
+        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador',
+        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino'
+    ]
+
+    for titulo in oficios:
+        db.add(Servicio(titulo=titulo))
+    db.commit()
+    return {"mensaje": f"Se insertaron {len(oficios)} oficios"}
+
 
 @app.post("/registro Usuarios/", status_code=status.HTTP_201_CREATED)
 async def crear_registro_Usuario(registro:UsuarioBase, db:db_dependency):
@@ -461,17 +493,21 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     nombre =  [row[2] for row in result]
 
     result = db.execute(db_stmt)
-    wsapp =  [row[3] for row in result]
+    #wsapp =  [row[3] for row in result]
+    wsapp =  [row[5] for row in result]
 
 # agregado foto y penales
     result = db.execute(db_stmt)
-    foto =  [row[4] for row in result]
+    #foto =  [row[4] for row in result]
+    foto =  [row[6] for row in result]
 
     result = db.execute(db_stmt)
-    penales =  [row[5] for row in result]
+    #penales =  [row[5] for row in result]
+    penales =  [row[7] for row in result]
 # agregue clave del trabajador para opiniones
     result = db.execute(db_stmt)
-    tid =  [row[6] for row in result]
+    #tid =  [row[6] for row in result]
+    tid =  [row[8] for row in result]
 
     
     a=[]
