@@ -120,6 +120,8 @@ class TrabajadorUpdate(SQLModel):
     correoElec: str | None = None
     direccion: str | None = None
     localidad: str | None = None
+    latitud: float | None = None
+    longitud: float | None = None
     wsapp: str | None = None
     penales: str | None = None
 
@@ -493,21 +495,21 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     nombre =  [row[2] for row in result]
 
     result = db.execute(db_stmt)
-    #wsapp =  [row[3] for row in result]
-    wsapp =  [row[5] for row in result]
+    wsapp =  [row[3] for row in result]
+    #wsapp =  [row[5] for row in result]
 
 # agregado foto y penales
     result = db.execute(db_stmt)
-    #foto =  [row[4] for row in result]
-    foto =  [row[6] for row in result]
+    foto =  [row[4] for row in result]
+    #foto =  [row[6] for row in result]
 
     result = db.execute(db_stmt)
-    #penales =  [row[5] for row in result]
-    penales =  [row[7] for row in result]
+    penales =  [row[5] for row in result]
+    #penales =  [row[7] for row in result]
 # agregue clave del trabajador para opiniones
     result = db.execute(db_stmt)
-    #tid =  [row[6] for row in result]
-    tid =  [row[8] for row in result]
+    tid =  [row[6] for row in result]
+    #tid =  [row[8] for row in result]
 
     
     a=[]
@@ -518,7 +520,8 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
         #a = a +[servicio[i]]+[nombre[i]]+['---']+['*****']+['./'+foto[i]]
 
         #a = a +str(id[i])+' '+str(servicio[i])+' '+str(nombre[i])+' ' + ' $'+str(costo[i])+' ' +str(foto[i])+'---'
-        w = wsapp[i]
+        #### jul 02 
+        # w = wsapp[i]
         #b= b +str(foto[i])
     #a = a.split(sep='---', maxsplit=-1)
     #b = b.split(sep='---', maxsplit=-1)
@@ -526,8 +529,9 @@ async def Listo_Profesion_trabajador_servicio(param: str, db: Session = Depends(
     #a.pop() 
     #'./claudio.jpeg'
     
-    return {'RegLog': a, 'Ws':w }
-    #return {'RegLog': a }
+    # jul 02
+    # return {'RegLog': a, 'Ws':w }
+    return {'RegLog': a }
 
 #############################################
 
@@ -705,6 +709,38 @@ async def get_trabajadores(db: Session = Depends(get_db)):
 async def listar_trabajadores(db: db_dependency):
     trabajadores = db.query(Trabajador).all()
     return trabajadores
+
+@app.get("/Listo_trabajadoresPorServicio/{titulo_servicio}")
+def listar_trabajadores_por_servicio(titulo_servicio: str, db: Session = Depends(get_db)):
+    # JOIN entre Servicio, Servicios_Trabajadores y Trabajador
+    consulta = (
+        db.query(Trabajador)
+        .join(Servicios_Trabajadores, Trabajador.id == Servicios_Trabajadores.trabajador_id)
+        .join(Servicio, Servicio.id == Servicios_Trabajadores.servicio_id)
+        .filter(Servicio.titulo == titulo_servicio)
+        .all()
+    )
+
+    # Convertir resultados a lista de dicts usando SQLAlchemy ORM
+    resultado = [
+        {
+            "id": t.id,
+            "nombre": t.nombre,
+            "dni": t.dni,
+            "correoElec": t.correoElec,
+            "direccion": t.direccion,
+            "localidad": t.localidad,
+            "latitud": t.latitud,
+            "longitud": t.longitud,
+            "wsapp": t.wsapp,
+            "foto": t.foto,
+            "penales": t.penales
+        }
+        for t in consulta
+    ]
+
+    return {"trabajadores": resultado}
+
 
 @app.get("/Usuarios")
 async def get_usuarios(db: Session = Depends(get_db)):
