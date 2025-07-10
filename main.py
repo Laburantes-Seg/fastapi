@@ -6,7 +6,6 @@ from sqlalchemy import create_engine, Column, Integer, Float, String, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, joinedload
 from sqlalchemy.schema import PrimaryKeyConstraint
 from typing import Annotated, Optional
-from sqlmodel import SQLModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from fastapi.staticfiles import StaticFiles
