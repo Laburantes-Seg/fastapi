@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from sqlmodel import SQLModel, Field
 
 origins = [
     "http://localhost.tiangolo.com",
