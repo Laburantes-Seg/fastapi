@@ -289,17 +289,17 @@ def cargar_oficios(db: Session = Depends(get_db)):
     db.commit()
     return {"mensaje": f"Se insertaron {len(oficios)} oficios"}
 
-@app.post("/registrol/", status_code=status.HTTP_201_CREATED)
+@app.post("/registro/", status_code=status.HTTP_201_CREATED)
 ############### podificado por gpt
-async def crear_registrol_Trabajador(registro: TrabajadorBase, db: db_dependency):
+async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency):
     db_registro = Trabajador(**registro.dict())
     db.add(db_registro)
     db.commit()
     db.refresh(db_registro)
     return {"mensaje": "Registro exitoso", "id": db_registro.id}
 ####################################################
-@app.post("/registro/", status_code=status.HTTP_201_CREATED)
-async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency):
+@app.post("/registrol/", status_code=status.HTTP_201_CREATED)
+async def crear_registrol_Trabajador(registro: TrabajadorBase, db: db_dependency):
     # Buscamos si ya existe un trabajador con ese DNI
     trabajador_existente = db.query(Trabajador).filter(Trabajador.dni == registro.dni).first()
 
@@ -346,8 +346,8 @@ async def Servicios(db: Session = Depends(get_db)):
     for linea in a]
     return {'RegLog': a }
 ##################################################
-@app.post("/Relacionar_Trabajador_Serviciol/", status_code=201)
-async def crear_Relacion_Trabajador_Serviciol(registro: ServicioTrabajadorBase, db: db_dependency):
+@app.post("/Relacionar_Trabajador_Servicio/", status_code=201)
+async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, db: db_dependency):
     db_registro = Servicios_Trabajadores(**registro.dict())
     db_registro.id = int(str(db_registro.servicio_id) + str(db_registro.trabajador_id))
     db.add(db_registro)
@@ -360,8 +360,8 @@ class RelacionTrabajadorServicioCreate(BaseModel):
     servicio_id: int
     trabajador_dni: str
 ##################################################
-@app.post("/Relacionar_Trabajador_Servicio/", status_code=201)
-async def crear_Relacion_Trabajador_Servicio(relacion: RelacionTrabajadorServicioCreate, db: Session = Depends(get_db)):
+@app.post("/Relacionar_Trabajador_Serviciol/", status_code=201)
+async def crear_Relacion_Trabajador_Serviciol(relacion: RelacionTrabajadorServicioCreate, db: Session = Depends(get_db)):
     trabajador = db.query(Trabajador).filter(Trabajador.dni == relacion.trabajador_dni).first()
     if not trabajador:
         raise HTTPException(status_code=404, detail="Trabajador no encontrado por DNI")
