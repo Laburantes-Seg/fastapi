@@ -289,7 +289,7 @@ def cargar_oficios(db: Session = Depends(get_db)):
     db.commit()
     return {"mensaje": f"Se insertaron {len(oficios)} oficios"}
 
-@app.post("/registro/", status_code=status.HTTP_201_CREATED)
+@app.post("/registrol/", status_code=status.HTTP_201_CREATED)
 ############### podificado por gpt
 async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency):
     db_registro = Trabajador(**registro.dict())
@@ -297,6 +297,26 @@ async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency)
     db.commit()
     db.refresh(db_registro)
     return {"mensaje": "Registro exitoso", "id": db_registro.id}
+####################################################
+@app.post("/registro/", status_code=status.HTTP_201_CREATED)
+async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency):
+    # Buscar si ya existe un trabajador con este DNI
+    trabajador_existente = db.query(Trabajador).filter(Trabajador.dni == registro.dni).first()
+
+    if trabajador_existente:
+        # Si ya existe, devolvemos su id
+        return {
+            "mensaje": "Trabajador ya registrado previamente",
+            "id": trabajador_existente.id
+        }
+
+    # Si no existe, creamos un nuevo registro
+    nuevo_trabajador = Trabajador(**registro.dict())
+    db.add(nuevo_trabajador)
+    db.commit()
+    db.refresh(nuevo_trabajador)
+    return {"mensaje": "Registro exitoso", "id": nuevo_trabajador.id}
+
 ####################################################
 @app.get("/Servicios_React/")
 async def Servicios(db: Session = Depends(get_db)):
@@ -325,7 +345,7 @@ async def Servicios(db: Session = Depends(get_db)):
     for linea in a]
     return {'RegLog': a }
 ##################################################
-@app.post("/Relacionar_Trabajador_Servicio/", status_code=201)
+@app.post("/Relacionar_Trabajador_Serviciol/", status_code=201)
 async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, db: db_dependency):
     db_registro = Servicios_Trabajadores(**registro.dict())
     db_registro.id = int(str(db_registro.servicio_id) + str(db_registro.trabajador_id))
@@ -333,6 +353,26 @@ async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, d
     db.commit()
     return {"mensaje": "Relación creada correctamente"}
 ##################################################
+@app.post("/Relacionar_Trabajador_Servicio/", status_code=201)
+async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, db: db_dependency):
+    # Evitar duplicar la relación servicio-trabajador
+    existe_relacion = db.query(Servicios_Trabajadores).filter_by(
+        servicio_id=registro.servicio_id,
+        trabajador_id=registro.trabajador_id
+    ).first()
+
+    if existe_relacion:
+        raise HTTPException(
+            status_code=400,
+            detail="Ya existe una relación para este trabajador y servicio"
+        )
+
+    nueva_relacion = Servicios_Trabajadores(**registro.dict())
+    db.add(nueva_relacion)
+    db.commit()
+    return {"mensaje": "Relación creada correctamente"}
+##################################################
+
 @app.get("/Listo_trabajadoresPorServicio/{titulo_servicio}")
 def listar_trabajadores_por_servicio(titulo_servicio: str, db: Session = Depends(get_db)):
     consulta = (
@@ -438,4 +478,5 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(nuevo_tracking)
     return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
+
 ###########F I N BackEnd #########################################
