@@ -298,27 +298,6 @@ async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency)
     db.refresh(db_registro)
     return {"mensaje": "Registro exitoso", "id": db_registro.id}
 ####################################################
-@app.post("/registrol/", status_code=status.HTTP_201_CREATED)
-async def crear_registrol_Trabajador(registro: TrabajadorBase, db: db_dependency):
-    # Buscamos si ya existe un trabajador con ese DNI
-    trabajador_existente = db.query(Trabajador).filter(Trabajador.dni == registro.dni).first()
-
-    if trabajador_existente:
-        # Si ya existe, devolvemos su id para que luego se use en /Relacionar_Trabajador_Servicio/
-        return {
-            "mensaje": "Trabajador ya registrado previamente",
-            "id": trabajador_existente.id
-        }
-
-    # Si no existe, lo creamos
-    nuevo_trabajador = Trabajador(**registro.dict())
-    db.add(nuevo_trabajador)
-    db.commit()
-    db.refresh(nuevo_trabajador)
-    return {"mensaje": "Registro exitoso", "id": nuevo_trabajador.id}
-
-####################################################
-
 @app.get("/Servicios_React/")
 async def Servicios(db: Session = Depends(get_db)):
 
@@ -353,26 +332,6 @@ async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, d
     db.add(db_registro)
     db.commit()
     return {"mensaje": "Relación creada correctamente"}
-##################################################
-from fastapi import HTTPException
-
-class RelacionTrabajadorServicioCreate(BaseModel):
-    servicio_id: int
-    trabajador_dni: str
-##################################################
-@app.post("/Relacionar_Trabajador_Serviciol/", status_code=201)
-async def crear_Relacion_Trabajador_Serviciol(relacion: RelacionTrabajadorServicioCreate, db: Session = Depends(get_db)):
-    trabajador = db.query(Trabajador).filter(Trabajador.dni == relacion.trabajador_dni).first()
-    if not trabajador:
-        raise HTTPException(status_code=404, detail="Trabajador no encontrado por DNI")
-
-    relacion_bd = Servicios_Trabajadores(
-        servicio_id=relacion.servicio_id,
-        trabajador_id=trabajador.id
-    )
-    db.add(relacion_bd)
-    db.commit()
-    return {"mensaje": "Relación creada"}
 ##################################################
 @app.get("/Listo_trabajadoresPorServicio/{titulo_servicio}")
 def listar_trabajadores_por_servicio(titulo_servicio: str, db: Session = Depends(get_db)):
