@@ -177,8 +177,6 @@ class RelacionarRequest(BaseModel):
     trabajador_id: int
     servicio_id: int
 
-
-
 class OpinionCreate(BaseModel):
     comentario: str
     calificacion: int
@@ -203,14 +201,11 @@ class ServicioTrabajadorBase(BaseModel):
 class TrabajadorBase(BaseModel):
     nombre: str
     dni: str
-    correoElec: str
-    direccion: str
-    localidad: str
     latitud: float
     longitud: float
     wsapp: str
-    foto: str
     penales: str
+    foto: Optional[str] = None
 
 class UsuarioBase(BaseModel):
     nombre: str
