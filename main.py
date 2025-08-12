@@ -354,25 +354,25 @@ async def crear_Relacion_Trabajador_Serviciol(registro: ServicioTrabajadorBase, 
     db.commit()
     return {"mensaje": "Relación creada correctamente"}
 ##################################################
+from fastapi import HTTPException
+
+class RelacionTrabajadorServicioCreate(BaseModel):
+    servicio_id: int
+    trabajador_dni: str
+##################################################
 @app.post("/Relacionar_Trabajador_Servicio/", status_code=201)
-async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, db: db_dependency):
-    # Evitar duplicar SOLO el par servicio-trabajador
-    existe_relacion = db.query(Servicios_Trabajadores).filter_by(
-        servicio_id=registro.servicio_id,
-        trabajador_id=registro.trabajador_id
-    ).first()
+async def crear_Relacion_Trabajador_Servicio(relacion: RelacionTrabajadorServicioCreate, db: Session = Depends(get_db)):
+    trabajador = db.query(Trabajador).filter(Trabajador.dni == relacion.trabajador_dni).first()
+    if not trabajador:
+        raise HTTPException(status_code=404, detail="Trabajador no encontrado por DNI")
 
-    if existe_relacion:
-        raise HTTPException(
-            status_code=400,
-            detail="Ya existe una relación para este trabajador y servicio"
-        )
-
-    nueva_relacion = Servicios_Trabajadores(**registro.dict())
-    db.add(nueva_relacion)
+    relacion_bd = Servicios_Trabajadores(
+        servicio_id=relacion.servicio_id,
+        trabajador_id=trabajador.id
+    )
+    db.add(relacion_bd)
     db.commit()
-    db.refresh(nueva_relacion)
-    return {"mensaje": "Relación creada correctamente"}
+    return {"mensaje": "Relación creada"}
 ##################################################
 @app.get("/Listo_trabajadoresPorServicio/{titulo_servicio}")
 def listar_trabajadores_por_servicio(titulo_servicio: str, db: Session = Depends(get_db)):
