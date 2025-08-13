@@ -173,10 +173,6 @@ from typing import List
 from pydantic import BaseModel, constr
 from fastapi.encoders import jsonable_encoder
 
-class RelacionarRequest(BaseModel):
-    trabajador_id: int
-    servicio_id: int
-
 class OpinionCreate(BaseModel):
     comentario: str
     calificacion: int
@@ -201,11 +197,14 @@ class ServicioTrabajadorBase(BaseModel):
 class TrabajadorBase(BaseModel):
     nombre: str
     dni: str
+    correoElec: str
+    direccion: str
+    localidad: str
     latitud: float
     longitud: float
     wsapp: str
+    foto: str
     penales: str
-    foto: Optional[str] = None
 
 class UsuarioBase(BaseModel):
     nombre: str
@@ -262,7 +261,6 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)]
-
 @app.post("/cargar_oficios/")
 def cargar_oficios(db: Session = Depends(get_db)):
     oficios = [
@@ -283,34 +281,23 @@ def cargar_oficios(db: Session = Depends(get_db)):
         'Gomería móvil', 'Lavado de autos a domicilio', 'Reparación de bicicletas',
         'Maquinista rural', 'Peón rural', 'Cuidador de campo', 'Apicultor', 'Viverista',
         'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador',
-        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino'
+        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino','Constructor', 'Maestro Mayor de Obras'
     ]
 
     for titulo in oficios:
         db.add(Servicio(titulo=titulo))
     db.commit()
     return {"mensaje": f"Se insertaron {len(oficios)} oficios"}
-####################################################
-@app.post("/registro/")
-async def registro_trabajador_endpoint(registro: TrabajadorBase, db: Session = Depends(db_dependency)):
-    # Foto por defecto si no viene en el request
-    foto_final = registro.foto if registro.foto else "https://raw.githubusercontent.com/Laburantes-Seg/laburantes-privacidad/main/icon.png"
-    
-    db_registro = Trabajador(
-        nombre=registro.nombre,
-        dni=registro.dni,
-        latitud=registro.latitud,
-        longitud=registro.longitud,
-        wsapp=registro.wsapp,
-        penales=registro.penales,
-        foto=foto_final
-    )
+
+@app.post("/registro/", status_code=status.HTTP_201_CREATED)
+############### podificado por gpt
+async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency):
+    db_registro = Trabajador(**registro.dict())
     db.add(db_registro)
     db.commit()
     db.refresh(db_registro)
     return {"mensaje": "Registro exitoso", "id": db_registro.id}
 ####################################################
-
 @app.get("/Servicios_React/")
 async def Servicios(db: Session = Depends(get_db)):
 
@@ -338,35 +325,12 @@ async def Servicios(db: Session = Depends(get_db)):
     for linea in a]
     return {'RegLog': a }
 ##################################################
-@app.post("/Relacionar_Trabajador_Servicio/")
-async def relacionar_trabajador_servicio(
-    relacion: RelacionarRequest,
-    db: Session = Depends(db_dependency)
-):
-    trabajador = db.query(Trabajador).filter(Trabajador.id == relacion.trabajador_id).first()
-    if not trabajador:
-        raise HTTPException(status_code=404, detail="Trabajador no encontrado")
-
-    servicio = db.query(Servicio).filter(Servicio.id == relacion.servicio_id).first()
-    if not servicio:
-        raise HTTPException(status_code=404, detail="Servicio no encontrado")
-
-    relacion_existente = db.query(Servicios_Trabajadores).filter(
-        Servicios_Trabajadores.trabajador_id == relacion.trabajador_id,
-        Servicios_Trabajadores.servicio_id == relacion.servicio_id
-    ).first()
-
-    if relacion_existente:
-        return {"mensaje": "La relación ya existe"}
-
-    nueva_relacion = Servicios_Trabajadores(
-        trabajador_id=relacion.trabajador_id,
-        servicio_id=relacion.servicio_id
-    )
-    db.add(nueva_relacion)
+@app.post("/Relacionar_Trabajador_Servicio/", status_code=201)
+async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, db: db_dependency):
+    db_registro = Servicios_Trabajadores(**registro.dict())
+    db_registro.id = int(str(db_registro.servicio_id) + str(db_registro.trabajador_id))
+    db.add(db_registro)
     db.commit()
-    db.refresh(nueva_relacion)
-
     return {"mensaje": "Relación creada correctamente"}
 ##################################################
 @app.get("/Listo_trabajadoresPorServicio/{titulo_servicio}")
