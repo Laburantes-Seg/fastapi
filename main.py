@@ -280,7 +280,7 @@ def cargar_oficios(db: Session = Depends(get_db)):
         'Montador de muebles', 'Costurera', 'Modista', 'Sastre', 'Tapicero', 'Tornero',
         'Gomería móvil', 'Lavado de autos a domicilio', 'Reparación de bicicletas',
         'Maquinista rural', 'Peón rural', 'Cuidador de campo', 'Apicultor', 'Viverista',
-        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador',
+        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador','Chofer', 'Talabertero-a'
         'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino','Constructor', 'Maestro Mayor de Obras'
     ]
 
