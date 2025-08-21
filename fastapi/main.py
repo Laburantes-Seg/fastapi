@@ -6,11 +6,12 @@ from sqlalchemy import create_engine, Column, Integer, Float, String, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, joinedload
 from sqlalchemy.schema import PrimaryKeyConstraint
 from typing import Annotated, Optional
-from sqlmodel import SQLModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from sqlmodel import SQLModel, Field
+from datetime import datetime, timezone
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -44,6 +45,24 @@ class Usuarios_Servicios_Trabajadores(Base):
 
 
 ###############  
+# Modelo SQLAlchemy para la tabla tracking
+class Tracking(Base):
+    __tablename__ = 'tracking'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    fecha_hora = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    latitud = Column(Float, nullable=False)
+    longitud = Column(Float, nullable=False)
+    id_android = Column(String, nullable=False)
+
+# Modelo Pydantic para recibir datos desde el frontend
+class TrackingCreate(BaseModel):
+    latitud: float
+    longitud: float
+    id_android: str
+###############  
+
+
+
 class Servicios_Trabajadores(Base):
     __tablename__ = 'servicios_trabajadores'
     id = Column(Integer, primary_key=True)
@@ -261,8 +280,8 @@ def cargar_oficios(db: Session = Depends(get_db)):
         'Montador de muebles', 'Costurera', 'Modista', 'Sastre', 'Tapicero', 'Tornero',
         'Gomería móvil', 'Lavado de autos a domicilio', 'Reparación de bicicletas',
         'Maquinista rural', 'Peón rural', 'Cuidador de campo', 'Apicultor', 'Viverista',
-        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador',
-        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino'
+        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador','Chofer', 'Talabertero-a'
+        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino','Constructor', 'Maestro Mayor de Obras'
     ]
 
     for titulo in oficios:
@@ -407,4 +426,16 @@ def crear_opinion(param: int, opinion: OpinionCreate, db: Session = Depends(get_
     db.refresh(nueva_opinion)
     return {"mensaje": "Opinión registrada con éxito", "id": nueva_opinion.id}
 ###########F I N BackEnd #########################################
-
+@app.post("/tracking/", status_code=status.HTTP_201_CREATED)
+async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)):
+    nuevo_tracking = Tracking(
+        latitud=tracking.latitud,
+        longitud=tracking.longitud,
+        id_android=tracking.id_android,
+        fecha_hora=datetime.now(timezone.utc)  # Fecha calculada en backend
+    )
+    db.add(nuevo_tracking)
+    db.commit()
+    db.refresh(nuevo_tracking)
+    return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
+###########F I N BackEnd #########################################

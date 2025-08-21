@@ -280,14 +280,15 @@ def cargar_oficios(db: Session = Depends(get_db)):
         'Montador de muebles', 'Costurera', 'Modista', 'Sastre', 'Tapicero', 'Tornero',
         'Gomería móvil', 'Lavado de autos a domicilio', 'Reparación de bicicletas',
         'Maquinista rural', 'Peón rural', 'Cuidador de campo', 'Apicultor', 'Viverista',
-        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador',
-        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino'
+        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador','Chofer', 'Talabertero-a'
+        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino','Constructor', 'Maestro Mayor de Obras'
     ]
 
     for titulo in oficios:
         db.add(Servicio(titulo=titulo))
     db.commit()
     return {"mensaje": f"Se insertaron {len(oficios)} oficios"}
+
 
 @app.post("/registro/", status_code=status.HTTP_201_CREATED)
 ############### podificado por gpt
@@ -403,6 +404,7 @@ async def get_trabajadores(db: Session = Depends(get_db)):
     #return {'Clave y Nombrs de Trabajador': users}
     return users
 ####################################################
+
 @app.get("/Trabajadores/{id}", response_model=TrabajadorSchema)
 async def get_trabajador(id: int, db: Session = Depends(get_db)):
     db_trabajador = db.query(Trabajador).options(joinedload(Trabajador.servicios)).\
@@ -438,4 +440,16 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(nuevo_tracking)
     return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
-###########F I N BackEnd #########################################
+###########F I N BackEnd #########################################from pydantic import BaseModel
+class DescripcionUpdate(BaseModel):
+    descripcion: str
+
+@app.put("/trabajadores/{id_trabajador}/descripcion")
+def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
+    t = db.query(Trabajador).filter(Trabajador.id == id_trabajador).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="Trabajador no encontrado")
+
+    t.penales = body.descripcion  # ← tu front usa 'penales' como descripción
+    db.commit()
+    return {"ok": True, "mensaje": "Descripción actualizada"}
