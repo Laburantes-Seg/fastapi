@@ -280,15 +280,14 @@ def cargar_oficios(db: Session = Depends(get_db)):
         'Montador de muebles', 'Costurera', 'Modista', 'Sastre', 'Tapicero', 'Tornero',
         'Gomería móvil', 'Lavado de autos a domicilio', 'Reparación de bicicletas',
         'Maquinista rural', 'Peón rural', 'Cuidador de campo', 'Apicultor', 'Viverista',
-        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador','Chofer', 'Talabertero-a'
-        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino','Constructor', 'Maestro Mayor de Obras'
+        'Cortador de leña', 'Operario de maquinaria pesada', 'Zanellero', 'Herrador',
+        'Pintura artística', 'Diseño de tatuajes', 'Tatuador', 'Estilista canino'
     ]
 
     for titulo in oficios:
         db.add(Servicio(titulo=titulo))
     db.commit()
     return {"mensaje": f"Se insertaron {len(oficios)} oficios"}
-
 
 @app.post("/registro/", status_code=status.HTTP_201_CREATED)
 ############### podificado por gpt
@@ -299,6 +298,27 @@ async def crear_registro_Trabajador(registro: TrabajadorBase, db: db_dependency)
     db.refresh(db_registro)
     return {"mensaje": "Registro exitoso", "id": db_registro.id}
 ####################################################
+@app.post("/registrol/", status_code=status.HTTP_201_CREATED)
+async def crear_registrol_Trabajador(registro: TrabajadorBase, db: db_dependency):
+    # Buscamos si ya existe un trabajador con ese DNI
+    trabajador_existente = db.query(Trabajador).filter(Trabajador.dni == registro.dni).first()
+
+    if trabajador_existente:
+        # Si ya existe, devolvemos su id para que luego se use en /Relacionar_Trabajador_Servicio/
+        return {
+            "mensaje": "Trabajador ya registrado previamente",
+            "id": trabajador_existente.id
+        }
+
+    # Si no existe, lo creamos
+    nuevo_trabajador = Trabajador(**registro.dict())
+    db.add(nuevo_trabajador)
+    db.commit()
+    db.refresh(nuevo_trabajador)
+    return {"mensaje": "Registro exitoso", "id": nuevo_trabajador.id}
+
+####################################################
+
 @app.get("/Servicios_React/")
 async def Servicios(db: Session = Depends(get_db)):
 
@@ -333,6 +353,26 @@ async def crear_Relacion_Trabajador_Servicio(registro: ServicioTrabajadorBase, d
     db.add(db_registro)
     db.commit()
     return {"mensaje": "Relación creada correctamente"}
+##################################################
+from fastapi import HTTPException
+
+class RelacionTrabajadorServicioCreate(BaseModel):
+    servicio_id: int
+    trabajador_dni: str
+##################################################
+@app.post("/Relacionar_Trabajador_Serviciol/", status_code=201)
+async def crear_Relacion_Trabajador_Serviciol(relacion: RelacionTrabajadorServicioCreate, db: Session = Depends(get_db)):
+    trabajador = db.query(Trabajador).filter(Trabajador.dni == relacion.trabajador_dni).first()
+    if not trabajador:
+        raise HTTPException(status_code=404, detail="Trabajador no encontrado por DNI")
+
+    relacion_bd = Servicios_Trabajadores(
+        servicio_id=relacion.servicio_id,
+        trabajador_id=trabajador.id
+    )
+    db.add(relacion_bd)
+    db.commit()
+    return {"mensaje": "Relación creada"}
 ##################################################
 @app.get("/Listo_trabajadoresPorServicio/{titulo_servicio}")
 def listar_trabajadores_por_servicio(titulo_servicio: str, db: Session = Depends(get_db)):
@@ -404,7 +444,6 @@ async def get_trabajadores(db: Session = Depends(get_db)):
     #return {'Clave y Nombrs de Trabajador': users}
     return users
 ####################################################
-
 @app.get("/Trabajadores/{id}", response_model=TrabajadorSchema)
 async def get_trabajador(id: int, db: Session = Depends(get_db)):
     db_trabajador = db.query(Trabajador).options(joinedload(Trabajador.servicios)).\
@@ -440,20 +479,4 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(nuevo_tracking)
     return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
-<<<<<<< HEAD
 ###########F I N BackEnd #########################################
-=======
-###########F I N BackEnd #########################################from pydantic import BaseModel
-class DescripcionUpdate(BaseModel):
-    descripcion: str
-
-@app.put("/trabajadores/{id_trabajador}/descripcion")
-def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
-    t = db.query(Trabajador).filter(Trabajador.id == id_trabajador).first()
-    if not t:
-        raise HTTPException(status_code=404, detail="Trabajador no encontrado")
-
-    t.penales = body.descripcion  # ← tu front usa 'penales' como descripción
-    db.commit()
-    return {"ok": True, "mensaje": "Descripción actualizada"}
->>>>>>> 4460dbfa720e9f9d9340d3c81935b424c123d51f
