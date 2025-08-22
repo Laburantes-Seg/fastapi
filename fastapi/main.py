@@ -1,4 +1,4 @@
-""" Probado en SQlite el 7 de julio de 2025 y listo para migrar a PostGrade 
+""" Probado para edición de descripciones
 """
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Depends, status
@@ -482,4 +482,5 @@ def update_penales(
     session.refresh(db_trabajador)
 
     return db_trabajador
+
 
