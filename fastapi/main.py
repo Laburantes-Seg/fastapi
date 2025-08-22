@@ -441,12 +441,6 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
     db.refresh(nuevo_tracking)
     return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
 ###########F I N BackEnd #########################################from pydantic import BaseModel
-from fastapi import FastAPI, Depends, HTTPException
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
-
-app = FastAPI()
-
 # --- Pydantic schema ---
 class DescripcionUpdate(BaseModel):
     descripcion: str
@@ -470,5 +464,6 @@ def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Sess
         "id_trabajador": t.id,
         "descripcion": t.penales
     }
+
 
 
