@@ -444,8 +444,8 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
 class DescripcionUpdate(BaseModel):
     descripcion: str
 
-@app.put("/trabajadores/{id_trabajador}/descripcion")
-def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
+@app.put("/trabajadoresa/{id_trabajador}/descripcion")
+def actualizar_descripciona(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
     t = db.query(Trabajador).filter(Trabajador.id == id_trabajador).first()
     if not t:
         raise HTTPException(status_code=404, detail="Trabajador no encontrado")
@@ -453,3 +453,25 @@ def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Sess
     t.penales = body.descripcion  # ← tu front usa 'penales' como descripción
     db.commit()
     return {"ok": True, "mensaje": "Descripción actualizada"}
+
+from fastapi import Query
+
+@app.patch("/trabajadores/{trabajador_id}", response_model=TrabajadorPublic)
+def update_penales(
+    *,
+    session: Session = Depends(get_session),
+    trabajador_id: int,
+    descripcion: str = Query(...)
+):
+    db_trabajador = session.get(Trabajador, trabajador_id)
+    if not db_trabajador:
+        raise HTTPException(status_code=404, detail="Trabajador not found")
+
+    # 🔹 Actualizar solo el campo "penales" con lo que llega como "descripcion"
+    db_trabajador.penales = descripcion  
+
+    session.add(db_trabajador)
+    session.commit()
+    session.refresh(db_trabajador)
+
+    return db_trabajador
