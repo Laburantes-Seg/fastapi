@@ -1,4 +1,4 @@
-""" Probado para edición de descripciones
+""" Probado en SQlite el 7 de julio de 2025 y listo para migrar a PostGrade 
 """
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Depends, status
@@ -483,4 +483,8 @@ def update_penales(
 
     return db_trabajador
 
-
+####################
+@app.get("/ping")
+def ping():
+    print("🔔 PING recibido")
+    return {"ok": True}
