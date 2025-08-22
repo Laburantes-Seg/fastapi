@@ -483,3 +483,8 @@ def update_penales(
 
     return db_trabajador
 
+####################
+@app.get("/ping")
+def ping():
+    print("🔔 PING recibido")
+    return {"ok": True}
