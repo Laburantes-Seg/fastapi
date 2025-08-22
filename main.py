@@ -441,19 +441,24 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
     db.refresh(nuevo_tracking)
     return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
 ###########F I N BackEnd #########################################from pydantic import BaseModel
-# --- Pydantic schema ---
+from fastapi import FastAPI, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session, joinedload
+
+app = FastAPI()
+
 class DescripcionUpdate(BaseModel):
     descripcion: str
 
-# --- Endpoint ---
-@app.put("/trabajadores/{id_trabajador}/descripcion")
-def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
-    # Buscar al trabajador
-    t = db.query(Trabajador).filter(Trabajador.id == id_trabajador).first()
-    if not t:
+@app.put("/trabajadores/{id}/descripcion")
+async def actualizar_descripcion(id: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
+    try:
+        # Usamos la misma lógica que tu GET exitoso
+        t = db.query(Trabajador).options(joinedload(Trabajador.servicios)).where(Trabajador.id == id).one()
+    except Exception:
         raise HTTPException(status_code=404, detail="Trabajador no encontrado")
 
-    # Actualizar la descripción (guardada en la columna 'penales')
+    # Actualizamos la descripción
     t.penales = body.descripcion
     db.commit()
     db.refresh(t)
@@ -464,5 +469,7 @@ def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Sess
         "id_trabajador": t.id,
         "descripcion": t.penales
     }
+
+
 
 
