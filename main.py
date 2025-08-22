@@ -463,6 +463,7 @@ def update_penales(
     trabajador_id: int,
     descripcion: str = Query(...)
 ):
+    print(f"🔔 PATCH recibido: trabajador_id={trabajador_id}, descripcion={descripcion}")
     db_trabajador = session.get(Trabajador, trabajador_id)
     if not db_trabajador:
         raise HTTPException(status_code=404, detail="Trabajador not found")
