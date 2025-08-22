@@ -240,6 +240,11 @@ def get_session():
 #####################################
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
+from fastapi import Query
+from fastapi import FastAPI, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+
 SessionDep = Annotated[Session, Depends(get_session)]
 app = FastAPI()
 # Ruta absoluta a la carpeta de fotos
@@ -454,7 +459,10 @@ def actualizar_descripciona(id_trabajador: int, body: DescripcionUpdate, db: Ses
     db.commit()
     return {"ok": True, "mensaje": "Descripción actualizada"}
 
-from fastapi import Query
+
+##################
+class DescripcionUpdate(BaseModel):
+    descripcion: str
 
 @app.patch("/trabajadores/{trabajador_id}", response_model=TrabajadorPublic)
 def update_penales(
@@ -468,11 +476,10 @@ def update_penales(
     if not db_trabajador:
         raise HTTPException(status_code=404, detail="Trabajador not found")
 
-    # 🔹 Actualizar solo el campo "penales" con lo que llega como "descripcion"
-    db_trabajador.penales = descripcion  
-
+    db_trabajador.penales = descripcion
     session.add(db_trabajador)
     session.commit()
     session.refresh(db_trabajador)
 
     return db_trabajador
+
