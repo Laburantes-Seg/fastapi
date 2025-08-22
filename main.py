@@ -450,8 +450,8 @@ app = FastAPI()
 class DescripcionUpdate(BaseModel):
     descripcion: str
 
-@app.put("/trabajadores/{id}/descripcion")
-async def actualizar_descripcion(id: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
+@app.put("/trabajadoress/{id}/descripcion")
+async def actualizar_descripcions(id: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
     try:
         # Usamos la misma lógica que tu GET exitoso
         t = db.query(Trabajador).options(joinedload(Trabajador.servicios)).where(Trabajador.id == id).one()
@@ -469,6 +469,27 @@ async def actualizar_descripcion(id: int, body: DescripcionUpdate, db: Session =
         "id_trabajador": t.id,
         "descripcion": t.penales
     }
+# ------------------------------
+# 🔹 Endpoint PATCH /trabajadores/{id}
+# ------------------------------
+@app.patch("/trabajadores/{trabajador_id}", response_model=TrabajadorPublic)
+def update_penales(
+    *,
+    session: Session = Depends(get_session),
+    trabajador_id: int,
+    descripcion: str = Query(...)
+):
+    db_trabajador = session.get(Trabajador, trabajador_id)
+    if not db_trabajador:
+        raise HTTPException(status_code=404, detail="Trabajador not found")
+
+    db_trabajador.penales = descripcion  # ✅ solo actualiza "penales"
+
+    session.add(db_trabajador)
+    session.commit()
+    session.refresh(db_trabajador)
+
+    return db_trabajador
 
 
 
