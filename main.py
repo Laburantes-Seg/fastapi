@@ -441,15 +441,33 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
     db.refresh(nuevo_tracking)
     return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
 ###########F I N BackEnd #########################################from pydantic import BaseModel
+from fastapi import FastAPI, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+app = FastAPI()
+
+# --- Pydantic schema ---
 class DescripcionUpdate(BaseModel):
     descripcion: str
 
+# --- Endpoint ---
 @app.put("/trabajadores/{id_trabajador}/descripcion")
 def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
+    # Buscar al trabajador
     t = db.query(Trabajador).filter(Trabajador.id == id_trabajador).first()
     if not t:
         raise HTTPException(status_code=404, detail="Trabajador no encontrado")
 
-    t.penales = body.descripcion  # ← tu front usa 'penales' como descripción
+    # Actualizar la descripción (guardada en la columna 'penales')
+    t.penales = body.descripcion
     db.commit()
-    return {"ok": True, "mensaje": "Descripción actualizada"}
+    db.refresh(t)
+
+    return {
+        "ok": True,
+        "mensaje": "Descripción actualizada",
+        "id_trabajador": t.id,
+        "descripcion": t.penales
+    }
+
