@@ -441,37 +441,21 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
     db.refresh(nuevo_tracking)
     return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
 ###########F I N BackEnd #########################################from pydantic import BaseModel
-from fastapi import FastAPI, Depends, HTTPException
-from pydantic import BaseModel
-from sqlalchemy.orm import Session, joinedload
-
-app = FastAPI()
-
 class DescripcionUpdate(BaseModel):
     descripcion: str
 
-@app.put("/trabajadoress/{id}/descripcion")
-async def actualizar_descripcions(id: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
-    try:
-        # Usamos la misma lógica que tu GET exitoso
-        t = db.query(Trabajador).options(joinedload(Trabajador.servicios)).where(Trabajador.id == id).one()
-    except Exception:
+@app.put("/trabajadoresa/{id_trabajador}/descripcion")
+def actualizar_descripciona(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
+    t = db.query(Trabajador).filter(Trabajador.id == id_trabajador).first()
+    if not t:
         raise HTTPException(status_code=404, detail="Trabajador no encontrado")
 
-    # Actualizamos la descripción
-    t.penales = body.descripcion
+    t.penales = body.descripcion  # ← tu front usa 'penales' como descripción
     db.commit()
-    db.refresh(t)
+    return {"ok": True, "mensaje": "Descripción actualizada"}
 
-    return {
-        "ok": True,
-        "mensaje": "Descripción actualizada",
-        "id_trabajador": t.id,
-        "descripcion": t.penales
-    }
-# ------------------------------
-# 🔹 Endpoint PATCH /trabajadores/{id}
-# ------------------------------
+from fastapi import Query
+
 @app.patch("/trabajadores/{trabajador_id}", response_model=TrabajadorPublic)
 def update_penales(
     *,
@@ -479,20 +463,15 @@ def update_penales(
     trabajador_id: int,
     descripcion: str = Query(...)
 ):
-    print(f"🔔 PATCH recibido: trabajador_id={trabajador_id}, descripcion={descripcion}")
     db_trabajador = session.get(Trabajador, trabajador_id)
     if not db_trabajador:
         raise HTTPException(status_code=404, detail="Trabajador not found")
 
-    db_trabajador.penales = descripcion  # ✅ solo actualiza "penales"
+    # 🔹 Actualizar solo el campo "penales" con lo que llega como "descripcion"
+    db_trabajador.penales = descripcion  
 
     session.add(db_trabajador)
     session.commit()
     session.refresh(db_trabajador)
 
     return db_trabajador
-
-
-
-
-
