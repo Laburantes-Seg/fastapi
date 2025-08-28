@@ -6,4 +6,4 @@ python-multipart
 fastapi
 sqlalchemy
 cloudinary
-sqlite3  # (aunque opcional, si ya viene con Python)
+

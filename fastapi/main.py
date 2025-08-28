@@ -12,6 +12,23 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Field
 from datetime import datetime, timezone
+import cloudinary
+import cloudinary.uploader
+import os
+
+cloudinary.config(
+  cloud_name='dnlios4ua',
+  api_key='747777351831491',
+  api_secret='mvqCvHtSJYQHgKhtEwAfsHw93FI',
+  secure=True
+)
+# Configuración desde variables de entorno
+##cloudinary.config(
+   ## cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+   ## api_key=os.environ.get("CLOUDINARY_API_KEY"),
+   ## api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+   ## secure=True
+##)
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -240,6 +257,11 @@ def get_session():
 #####################################
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
+from fastapi import Query
+from fastapi import FastAPI, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+
 SessionDep = Annotated[Session, Depends(get_session)]
 app = FastAPI()
 # Ruta absoluta a la carpeta de fotos
@@ -440,15 +462,12 @@ async def crear_tracking(tracking: TrackingCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(nuevo_tracking)
     return {"mensaje": "Tracking registrado", "id": nuevo_tracking.id}
-<<<<<<< HEAD
-###########F I N BackEnd #########################################
-=======
 ###########F I N BackEnd #########################################from pydantic import BaseModel
 class DescripcionUpdate(BaseModel):
     descripcion: str
 
-@app.put("/trabajadores/{id_trabajador}/descripcion")
-def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
+@app.put("/trabajadoresa/{id_trabajador}/descripcion")
+def actualizar_descripciona(id_trabajador: int, body: DescripcionUpdate, db: Session = Depends(get_db)):
     t = db.query(Trabajador).filter(Trabajador.id == id_trabajador).first()
     if not t:
         raise HTTPException(status_code=404, detail="Trabajador no encontrado")
@@ -456,4 +475,118 @@ def actualizar_descripcion(id_trabajador: int, body: DescripcionUpdate, db: Sess
     t.penales = body.descripcion  # ← tu front usa 'penales' como descripción
     db.commit()
     return {"ok": True, "mensaje": "Descripción actualizada"}
->>>>>>> 4460dbfa720e9f9d9340d3c81935b424c123d51f
+
+
+##################
+class DescripcionUpdate(BaseModel):
+    descripcion: str
+
+@app.patch("/trabajadores/{trabajador_id}", response_model=TrabajadorPublic)
+def update_penales(
+    *,
+    session: Session = Depends(get_session),
+    trabajador_id: int,
+    descripcion: str = Query(...)
+):
+    print(f"🔔 PATCH recibido: trabajador_id={trabajador_id}, descripcion={descripcion}")
+    db_trabajador = session.get(Trabajador, trabajador_id)
+    if not db_trabajador:
+        raise HTTPException(status_code=404, detail="Trabajador not found")
+
+    db_trabajador.penales = descripcion
+    session.add(db_trabajador)
+    session.commit()
+    session.refresh(db_trabajador)
+
+    return db_trabajador
+
+####################
+@app.get("/ping")
+def ping():
+    print("🔔 PINGA recibido")
+    return {"Pinga ok": True}
+####################
+from fastapi import FastAPI, HTTPException, Depends, Query
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+class FotoUpdate(BaseModel):
+    nueva_foto_url: str
+    vieja_foto_url: str | None = None  # opcional, para borrar en Cloudinary
+
+@app.put("/trabajadores/{trabajador_id}/foto")
+def update_foto(
+    *,
+    session: Session = Depends(get_session),
+    trabajador_id: int,
+    payload: FotoUpdate
+):
+    db_trabajador = session.get(Trabajador, trabajador_id)
+    if not db_trabajador:
+        raise HTTPException(status_code=404, detail="Trabajador no encontrado")
+
+    # Actualizamos la foto
+    db_trabajador.foto = payload.nueva_foto_url
+    session.add(db_trabajador)
+    session.commit()
+    session.refresh(db_trabajador)
+
+    # Intentamos borrar la foto vieja en Cloudinary si viene
+    if payload.vieja_foto_url:
+        try:
+            import cloudinary.uploader
+            public_id = payload.vieja_foto_url.split("/")[-1].split(".")[0]
+            cloudinary.uploader.destroy(public_id)
+        except Exception as e:
+            print(f"⚠️ No se pudo eliminar la foto vieja: {e}")
+
+    return {"msg": "Foto actualizada correctamente", "trabajador_id": trabajador_id, "nueva_foto": db_trabajador.foto}
+
+
+####################
+from fastapi import Body
+
+class DeleteFotoRequest(BaseModel):
+    foto_url: str
+
+@app.delete("/trabajadores/foto")
+def delete_foto(
+    payload: DeleteFotoRequest = Body(...)
+):
+    try:
+        import cloudinary.uploader
+        public_id = payload.foto_url.split("/")[-1].split(".")[0]
+        result = cloudinary.uploader.destroy(public_id)
+        if result.get("result") not in ("ok", "not_found"):
+            raise HTTPException(status_code=400, detail=f"Error eliminando foto: {result}")
+        return {"msg": "Foto eliminada correctamente", "public_id": public_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error eliminando foto: {e}")
+####################
+
+from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.orm import Session
+
+app = FastAPI()
+
+# 🔹 Endpoint para eliminar trabajador y sus servicios
+@app.delete("/trabajadores/{idt}")
+def eliminar_trabajador(idt: int, db: Session = Depends(get_db)):
+    # 1) Eliminar servicios asociados
+    servicios = db.query(Servicios_Trabajadores).filter(Servicios_Trabajadores.idt == idt).all()
+    if servicios:
+        for s in servicios:
+            db.delete(s)
+
+    # 2) Eliminar trabajador
+    trabajador = db.query(Trabajador).filter(Trabajador.idt == idt).first()
+    if not trabajador:
+        raise HTTPException(status_code=404, detail="Trabajador no encontrado")
+    
+    db.delete(trabajador)
+
+    db.commit()
+
+    return {"result": "ok", "message": f"Trabajador {idt} y servicios asociados eliminados"}
+
+####################
